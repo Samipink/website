@@ -1,0 +1,241 @@
+﻿@page "/Data/People"
+@using BlazorApp1.Models
+@using DataAccessLibrary
+@using DataAccessLibrary.Models
+
+@inject IPeopleData _db
+@inject IJSRuntime JsRuntime
+
+<h1>People Page</h1>
+<h4>Current People</h4>
+
+
+<EditForm Model="@newPerson" On  OnValidSubmit="@InsertPerson" >
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+     
+    <InputText id="firstName" @bind-Value="newPerson.FirstName"/>
+    <InputText id="lastName" @bind-Value="newPerson.LastName"/>
+   
+    <InputText id="emailAddress" @ref="emails" 
+        @bind-Value="newPerson.EmailAddress" 
+        @oninput="(e)=> emailValue = e.Value.ToString()" 
+        @onkeyup="UpdateEmail" 
+        @onmousedown="MouseUp"
+        @onmouseenter="MouseUp"
+        @onmouseup="MouseUp"/>
+
+    <button name="submitBtn" type="submit" class="btn btn-primary" disabled=@InvalidEmail Send>Submit</button>
+    @{
+        Updated();
+    } 
+            
+</EditForm> 
+
+
+@if (people is null)
+{
+    <p><em> Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Person Index</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email Address</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                rowCount=0;
+            }
+            @foreach(var person in people)
+            {
+                rowCount++;
+                <tr>
+                    <td>@rowCount </td>
+                    <td>@person.FirstName </td>
+                    <td>@person.LastName</td>
+                    <td>@person.EmailAddress</td>
+                    @* <td> <button name="deleteBtn" personId type="submit" class="btn btn-primary" @onclick="(e)=> DeletePerson(personId)">Delete</button></td> *@
+                    <td> <button name="editBtn" person.PersonId type="submit" class="btn btn-success " @onclick="@(async()=> await EditPerson(person.PersonId))">Edit</button></td>
+                    <td> <button name="deleteBtn" person.PersonId type="submit" class="btn btn-danger " @onclick="@(async()=> await DeletePerson(person.PersonId))">Delete</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<PersonModel>? people;
+    private List<AddressModel>? address;
+    private DisplayPersonModel newPerson = new DisplayPersonModel();
+    private bool InvalidEmail { get; set; } = true;
+    private InputText emails;    
+    private string emailValue = "";
+    private int rowCount = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        people = await _db.GetPeople();
+    }
+
+    private void UpdateEmail()
+    {
+        Updated();
+    }
+    private void MouseUp()
+    {
+        Updated();
+    }
+    private async void Updated()
+    {
+        InvalidEmail = await UserExists();
+    }
+
+    private async Task<bool> UserExists()
+    {
+        if (String.IsNullOrWhiteSpace(emailValue))
+            return true;
+
+        if (emails == null || people == null)
+            return false;
+
+        var result = false;
+        await Task.Run(() =>
+        {
+            result = people.Any(x => String.Equals(x.EmailAddress , emailValue, StringComparison.CurrentCultureIgnoreCase));
+            //result = people.Any(x =>x.EmailAddress == emailValue);
+        });       
+
+        return result;
+    }
+
+    private async Task InsertPerson()
+    {
+        if (people == null)
+            return;
+
+        int numberOfPeople = people.Count;
+
+        PersonModel p = new PersonModel
+        {     
+            FirstName = newPerson.FirstName,
+            LastName = newPerson.LastName,
+            EmailAddress = newPerson.EmailAddress
+        };
+
+        if (numberOfPeople > 0)
+        {
+            p.PersonId = people.LastOrDefault().PersonId+1;
+        }
+
+        await _db.InsertPerson(p);
+
+        if (numberOfPeople < 1)
+        {            
+            people = await _db.GetPeople();
+            p.PersonId = people.LastOrDefault().PersonId;
+        }    
+        else
+        {
+            // add to the local list
+            people.Add(p);
+            //Same as below but does not have to fetch from the database
+            //people = await _db.GetPeople();
+        }
+
+        newPerson = new DisplayPersonModel();
+        InvalidEmail = true;
+
+
+        InsertPersonAddress(p);
+    }
+
+    private async Task EditPerson(int personId)
+    {
+        if (people.Count < 1)
+            return;
+
+        PersonModel p = people.FirstOrDefault(x => x.PersonId == personId);
+        // open a new window with address info
+        // need to link the 2 tables
+
+        await MessagePrompts.Alert(JsRuntime, $"\"{p.FirstName} {p.LastName}\" updated successfully");
+
+
+        //string input=await MessagePrompts.InputBox(JsRuntime, $"User \"{p.PersonId}\" updated successfully?");
+
+        return;
+
+        if (p == null)
+            return;
+        if (p.PersonId < 1)
+            return;
+
+        await MessagePrompts.Alert(JsRuntime, $"\"{p.FirstName} {p.LastName}\" updated successfully");
+        //bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", $"Are you sure you wish to delete \"{p.FirstName} {p.LastName}\"?"); // Confirm
+        //bool confirmed = await MessagePrompts.Confirm(JsRuntime, $"Are you sure you wish to delete \"{p.FirstName} {p.LastName}\"?");
+
+
+
+        people.Remove(p);
+
+        await _db.DeletePerson(p);
+
+        people = await _db.GetPeople();
+    }
+
+    private async Task DeletePerson(int personId)
+    {        
+        PersonModel p = people.FirstOrDefault(x => x.PersonId == personId);
+
+        if (p == null)
+            return;
+        if (p.PersonId < 1)
+            return;        
+
+        //string input=await MessagePrompts.InputBox(JsRuntime, $"User \"{p.PersonId}\" updated successfully?");
+
+        bool confirmed = await MessagePrompts.Confirm(JsRuntime, $"Are you sure you wish to delete \"{p.FirstName} {p.LastName}\"?");
+
+        if (!confirmed)
+            return;        
+
+        people.Remove(p);
+
+        await _db.DeletePerson(p);
+
+        people = await _db.GetPeople();
+
+        address = await _db.GetPeopleAddress();
+
+        AddressModel a = address.FirstOrDefault(x => x.PersonId == personId);
+
+        await _db.DeletePersonAddress(a);
+    }  
+
+
+
+    private async Task InsertPersonAddress(PersonModel p)
+    {
+        if (people == null)
+            return;
+
+        int numberOfPeople = people.Count;
+
+        AddressModel a = new AddressModel
+            {
+                PersonId = p.PersonId,
+                StreetAddress = "new street",
+                City = "Glasgow",
+                County = "Strathclyde",
+                PostCode = "G1 1AA"
+            };        
+
+        await _db.InsertPersonAddress(a);
+    }
+}

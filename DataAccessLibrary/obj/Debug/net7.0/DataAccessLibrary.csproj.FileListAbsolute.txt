@@ -1,0 +1,12 @@
+C:\Users\Samantha.Mulholland\Desktop\BlazorApps\BlazorApp1\DataAccessLibrary\bin\Debug\net7.0\DataAccessLibrary.deps.json
+C:\Users\Samantha.Mulholland\Desktop\BlazorApps\BlazorApp1\DataAccessLibrary\bin\Debug\net7.0\DataAccessLibrary.dll
+C:\Users\Samantha.Mulholland\Desktop\BlazorApps\BlazorApp1\DataAccessLibrary\bin\Debug\net7.0\DataAccessLibrary.pdb
+C:\Users\Samantha.Mulholland\Desktop\BlazorApps\BlazorApp1\DataAccessLibrary\obj\Debug\net7.0\DataAccessLibrary.csproj.AssemblyReference.cache
+C:\Users\Samantha.Mulholland\Desktop\BlazorApps\BlazorApp1\DataAccessLibrary\obj\Debug\net7.0\DataAccessLibrary.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Samantha.Mulholland\Desktop\BlazorApps\BlazorApp1\DataAccessLibrary\obj\Debug\net7.0\DataAccessLibrary.AssemblyInfoInputs.cache
+C:\Users\Samantha.Mulholland\Desktop\BlazorApps\BlazorApp1\DataAccessLibrary\obj\Debug\net7.0\DataAccessLibrary.AssemblyInfo.cs
+C:\Users\Samantha.Mulholland\Desktop\BlazorApps\BlazorApp1\DataAccessLibrary\obj\Debug\net7.0\DataAccessLibrary.csproj.CoreCompileInputs.cache
+C:\Users\Samantha.Mulholland\Desktop\BlazorApps\BlazorApp1\DataAccessLibrary\obj\Debug\net7.0\DataAccessLibrary.dll
+C:\Users\Samantha.Mulholland\Desktop\BlazorApps\BlazorApp1\DataAccessLibrary\obj\Debug\net7.0\refint\DataAccessLibrary.dll
+C:\Users\Samantha.Mulholland\Desktop\BlazorApps\BlazorApp1\DataAccessLibrary\obj\Debug\net7.0\DataAccessLibrary.pdb
+C:\Users\Samantha.Mulholland\Desktop\BlazorApps\BlazorApp1\DataAccessLibrary\obj\Debug\net7.0\ref\DataAccessLibrary.dll
